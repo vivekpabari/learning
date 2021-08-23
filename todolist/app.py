@@ -23,7 +23,6 @@ class create_list(db.Model):
 
 @app.route('/')
 def index():
-    items = ['assignment','homework']
     return render_template('todolist.html',flag = True,items = create_list.query.all() )
 
 @app.route('/add',methods = ['GET','POST'])
