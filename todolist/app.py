@@ -6,7 +6,7 @@ import logging
 
 app = Flask(__name__)
 app.config['SECRECT_KEY'] = 'XYZABC'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///students.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todolist.sqlite3'
 db = SQLAlchemy(app)
 
 
@@ -23,7 +23,7 @@ class create_list(db.Model):
 
 @app.route('/')
 def index():
-    return render_template('todolist.html',flag = True,items = create_list.query.all() )
+    return render_template('index.html',flag = True,items = create_list.query.all() )
 
 @app.route('/add',methods = ['GET','POST'])
 def add():
