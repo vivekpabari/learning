@@ -7,6 +7,8 @@ import random
 import string
 import json
 from flask_mail import Mail,Message
+from flask_restful import Api,Resource
+
 
 app = Flask(__name__,template_folder='templates')
 app.secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
@@ -20,6 +22,8 @@ app.config['MAIL_PASSWORD'] = password
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
+api = Api(app)
+
 
 def Send_mail(email):
     print(email)
@@ -37,6 +41,16 @@ class create_list(db.Model):
     list_id = db.Column(db.Integer(),primary_key = True,autoincrement = True)
     list_text = db.Column(db.Text(),nullable = False)
     list_user_id = db.Column(db.Integer())#,db.ForeignKey('create_user.user_id'))
+    
+class user_list(Resource):
+    def get(self):
+        d = {
+            "name":"vivek",
+            "date":"01/09/2020"
+            }
+        return json.dumps(d)
+
+api.add_resource(user_list,'/user')
 
 @app.route('/')
 def index():
