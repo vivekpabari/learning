@@ -11,13 +11,12 @@ from flask_mail import Mail,Message
 app = Flask(__name__,template_folder='templates')
 app.secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3306/todolist'
-v  = 'shopno.46'
 db = SQLAlchemy(app)
 
 app.config['MAIL_SERVER']='smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'vivek.v.pabari@gmail.com'
-app.config['MAIL_PASSWORD'] = v
+app.config['MAIL_PASSWORD'] = password
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
