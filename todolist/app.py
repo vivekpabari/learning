@@ -5,12 +5,28 @@ import logging
 import pymysql
 import random
 import string
+import json
+from flask_mail import Mail,Message
 
 app = Flask(__name__,template_folder='templates')
 app.secret_key = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://root:@localhost:3306/todolist'
+v  = 'shopno.46'
 db = SQLAlchemy(app)
 
+app.config['MAIL_SERVER']='smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'vivek.v.pabari@gmail.com'
+app.config['MAIL_PASSWORD'] = v
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+mail = Mail(app)
+
+def Send_mail(email):
+    print(email)
+    msg = Message('Password reset',sender ='vivek.v.pabari@gmail.com',recipients = [email])
+    msg.body = str(random.randrange(1000,9999))
+    mail.send(msg)
 
 class create_user(db.Model):
     user_id = db.Column(db.Integer(),primary_key = True,autoincrement = True)
@@ -30,18 +46,22 @@ def index():
     except KeyError:
         return render_template('index.html',flag = False)
 
+@app.route('/increament/<int:number>')
+def increament(number):
+    return str(number+10)
+
 @app.route('/add',methods = ['GET','POST'])
 def add():
     if request.method == 'POST':
         if not request.form['task']:
             flash("Please Enter Work Name")
         else:
-            if session['user_id']:
+            try:
                 add_item = create_list(list_text=request.form['task'],list_user_id=session['user_id'])
                 db.session.add(add_item)
                 db.session.commit()
                 flash("Work added successfully")
-            else:
+            except:
                 flash("Please login to enter data")
         return redirect('/')
     else:
@@ -53,6 +73,7 @@ def add():
 def remove():
     create_list.query.filter_by(list_id=request.args.get('id')).delete()
     db.session.commit()
+    flash("work removed sucessfully")
     return redirect('/')
 
 
@@ -101,6 +122,34 @@ def logout():
     session.clear()
     flash("Logout successfully")
     return redirect('/')
+
+@app.route('/user/forget_password')
+def forget_password():
+    return render_template('forget.html')
+
+@app.route('/user/send_forget_password_otp',methods =  ['POST'])
+def send_forget_password_otp():
+    if request.method == 'POST':
+        if not request.form['email']:
+            return redirect('/user/forget_password')
+        else:
+            Send_mail(request.form['email'])
+            return render_template('set_password.html')
+    else:
+        return redirect('/user/forget_password')
+@app.route('/user/password_set',methods = ['POST','GET'])
+def password_set():
+    if request.method == 'POST':
+        if not request.form['otp'] or not request.form['password'] or not request.form['password_confirm']:
+            return render_template('set_password.html')
+        else:
+            user = create_user.query.filter_by(user_email=request.form['email']).first()
+            user.user_password = request.form['password']
+            db.session.commit()
+
+            return redirect('/')
+    else:
+        return render_template('set_password.html')
 
 if __name__ == '__main__':
     db.create_all()
